@@ -1,4 +1,60 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
+import 'package:year_in_pixel_app/providers/menuSelectionProvider.dart';
+import 'package:year_in_pixel_app/widgets/main_table.dart';
+import 'package:google_fonts/google_fonts.dart';
+import 'package:patterns_canvas/patterns_canvas.dart';
+import 'package:pinch_zoom/pinch_zoom.dart';
+
+import 'models/menuSelection.dart';
+
+// class MyPainter extends CustomPainter {
+//   @override
+//   void paint(Canvas canvas, Size size) {
+//     final rect = Rect.fromLTWH(80, 50, 200, 100);
+//     DiagonalStripesLight(
+//             bgColor: Colors.lightGreenAccent, fgColor: Colors.black)
+//         .paintOnRect(canvas, size, rect);
+
+//     final path = Path();
+//     path.moveTo(120, 200);
+//     path.lineTo(300, 280);
+//     path.quadraticBezierTo(20, 400, 40, 300);
+//     path.close();
+//     Crosshatch(bgColor: Colors.yellow, fgColor: Colors.black)
+//         .paintOnPath(canvas, size, path);
+//   }
+
+//   @override
+//   bool shouldRepaint(covariant CustomPainter oldDelegate) {
+//     // TODO: implement shouldRepaint
+//     throw UnimplementedError();
+//   }
+// }
+class ContainerPatternPainter extends CustomPainter {
+  @override
+  void paint(Canvas canvas, Size size) {
+    // final Rect halfCanvas =
+    // Rect.fromLTWH(0, size.height, size.width, size.height);
+    SubtlePatch(
+            bgColor: Colors.white,
+            fgColor: HexColor.fromHex("#eeeeee"),
+            featuresCount: 40)
+        .paintOnWidget(canvas, size);
+    // Dots(
+    //         bgColor: Color(0xff0509050),
+    //         fgColor: Color(0xfffdbf6f),
+    //         featuresCount: 100)
+    //     .paintOnWidget(canvas, size);
+
+    // VerticalStripesThick(
+    // bgColor: Color(0xff0509050), fgColor: Color(0xfffdbf6f))
+    // .paintOnWidget(canvas, size);
+  }
+
+  @override
+  bool shouldRepaint(CustomPainter oldDelegate) => true;
+}
 
 extension HexColor on Color {
   /// String is in the format "aabbcc" or "ffaabbcc" with an optional leading "#".
@@ -17,47 +73,36 @@ extension HexColor on Color {
       '${blue.toRadixString(16).padLeft(2, '0')}';
 }
 
-class LinePainter extends CustomPainter {
-  @override
-  void paint(Canvas canvas, Size size) {
-    final p1 = Offset(size.width, 0);
-    final p2 = Offset(0, size.height);
-    final paint = Paint()
-      ..color = Colors.black
-      ..strokeWidth = 1;
-    canvas.drawLine(p1, p2, paint);
-  }
-
-  @override
-  bool shouldRepaint(LinePainter oldDelegate) => false;
-}
-
 void main() {
-  runApp(const MyApp());
+  runApp(MyApp());
 }
 
 class MyApp extends StatelessWidget {
-  const MyApp({super.key});
+  MyApp({super.key});
+
+  final MenuSelectionProvider _menuSelectionProvider = MenuSelectionProvider();
 
   // This widget is the root of your application.
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
-      title: 'Flutter Demo',
-      theme: ThemeData(
-        // This is the theme of your application.
-        //
-        // Try running your application with "flutter run". You'll see the
-        // application has a blue toolbar. Then, without quitting the app, try
-        // changing the primarySwatch below to Colors.green and then invoke
-        // "hot reload" (press "r" in the console where you ran "flutter run",
-        // or simply save your changes to "hot reload" in a Flutter IDE).
-        // Notice that the counter didn't reset back to zero; the application
-        // is not restarted.
-        primarySwatch: Colors.blue,
-      ),
-      home: const MyHomePage(title: 'Flutter Demo Home Page'),
-    );
+    return ChangeNotifierProvider.value(
+        value: _menuSelectionProvider,
+        child: MaterialApp(
+          title: 'Flutter Demo',
+          theme: ThemeData(
+            // This is the theme of your application.
+            //
+            // Try running your application with "flutter run". You'll see the
+            // application has a blue toolbar. Then, without quitting the app, try
+            // changing the primarySwatch below to Colors.green and then invoke
+            // "hot reload" (press "r" in the console where you ran "flutter run",
+            // or simply save your changes to "hot reload" in a Flutter IDE).
+            // Notice that the counter didn't reset back to zero; the application
+            // is not restarted.
+            primarySwatch: Colors.blue,
+          ),
+          home: const MyHomePage(title: 'Year in Pixels'),
+        ));
   }
 }
 
@@ -80,21 +125,20 @@ class MyHomePage extends StatefulWidget {
 }
 
 class _MyHomePageState extends State<MyHomePage> {
-  int _counter = 0;
+  MenuItem? selectedMenu;
 
-  void _incrementCounter() {
-    setState(() {
-      // This call to setState tells the Flutter framework that something has
-      // changed in this State, which causes it to rerun the build method below
-      // so that the display can reflect the updated values. If we changed
-      // _counter without calling setState(), then the build method would not be
-      // called again, and so nothing would appear to happen.
-      _counter++;
-    });
-  }
-
+  final typeStyleColor = {
+    MenuItem.item1: Colors.red,
+    MenuItem.item2: Colors.orange,
+    MenuItem.item3: Colors.yellow,
+    MenuItem.item4: Colors.purple,
+    MenuItem.item5: Colors.cyan,
+    MenuItem.item6: Colors.green,
+  };
   @override
   Widget build(BuildContext context) {
+    final _menuSelectionProvider = Provider.of<MenuSelectionProvider>(context);
+
     // This method is rerun every time setState is called, for instance as done
     // by the _incrementCounter method above.
     //
@@ -102,125 +146,110 @@ class _MyHomePageState extends State<MyHomePage> {
     // fast, so that you can just rebuild anything that needs updating rather
     // than having to individually change instances of widgets.
     return Scaffold(
-      appBar: AppBar(
-        // Here we take the value from the MyHomePage object that was created by
-        // the App.build method, and use it to set our appbar title.
-        title: Text(widget.title),
-      ),
-      body: SingleChildScrollView(
-        child: Center(
-          // Center is a layout widget. It takes a single child and positions it
-          // in the middle of the parent.
-          child: Column(
-            // Column is also a layout widget. It takes a list of children and
-            // arranges them vertically. By default, it sizes itself to fit its
-            // children horizontally, and tries to be as tall as its parent.
-            //
-            // Invoke "debug painting" (press "p" in the console, choose the
-            // "Toggle Debug Paint" action from the Flutter Inspector in Android
-            // Studio, or the "Toggle Debug Paint" command in Visual Studio Code)
-            // to see the wireframe for each widget.
-            //
-            // Column has various properties to control how it sizes itself and
-            // how it positions its children. Here we use mainAxisAlignment to
-            // center the children vertically; the main axis here is the vertical
-            // axis because Columns are vertical (the cross axis would be
-            // horizontal).
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: <Widget>[
-              Table(
-                  // border: TableBorder.all(width: 1.0, color: Colors.black),
-                  defaultColumnWidth: const FixedColumnWidth(25.0),
-                  children: [
-                    TableRow(children: [
-                      Padding(
-                        padding: EdgeInsets.all(0.0),
-                        child: Container(
-                          margin: EdgeInsets.all(2),
-                          height: 22,
-                          width: 22,
-                        ),
-                      ),
-                      for (int i = 1; i <= 12; i++)
-                        Padding(
-                          padding: EdgeInsets.all(0.0),
-                          child: Container(
-                            margin: EdgeInsets.all(2),
-                            decoration: BoxDecoration(
-                              color: HexColor.fromHex('#ffcc00'),
-                              border: Border.all(
-                                  color: Color(0xFF000000),
-                                  width: 1.0,
-                                  style: BorderStyle.solid),
-                            ),
-                            height: 22,
-                            width: 22,
-                            child: Row(
-                              mainAxisAlignment: MainAxisAlignment.spaceAround,
-                              children: <Widget>[
-                                Text(
-                                  i.toString(),
-                                  style: TextStyle(fontSize: 10.0),
-                                ),
-                              ],
-                            ),
-                          ),
-                        )
-                    ]),
-                    for (int i = 1; i < 31; i++)
-                      TableRow(children: [
-                        Padding(
-                          padding: EdgeInsets.all(0.0),
-                          child: Container(
-                            margin: EdgeInsets.all(2),
-                            height: 22,
-                            width: 22,
-                            child: Row(
-                              mainAxisAlignment: MainAxisAlignment.spaceAround,
-                              children: <Widget>[
-                                Text(
-                                  i.toString(),
-                                  style: TextStyle(fontSize: 10.0),
-                                ),
-                              ],
-                            ),
-                          ),
-                        ),
-                        for (int y = 0; y < 12; y++)
-                          Padding(
-                            padding: EdgeInsets.all(0.0),
-                            child: Container(
-                              margin: EdgeInsets.all(2),
-                              decoration: BoxDecoration(
-                                color: HexColor.fromHex('#fff'),
-                                border: Border.all(
-                                    color: Color(0xFF000000),
-                                    width: 1.0,
-                                    style: BorderStyle.solid),
-                              ),
-                              height: 22,
-                              width: 22,
-                              child: InkWell(
-                                onTap: () {}, // Handle your callback
-                                child: Container(
-                                  width: 300,
-                                  height: 400,
-                                  child: CustomPaint(painter: LinePainter()),
-                                ),
-                              ),
-                            ),
-                          ),
-                      ])
-                  ]),
-            ],
-          ),
+      body: CustomPaint(
+        painter: ContainerPatternPainter(),
+        child: Stack(
+          children: [
+            SingleChildScrollView(
+              child: InteractiveViewer(
+                boundaryMargin: EdgeInsets.all(double.infinity),
+                minScale: 0.2,
+                child: Container(
+                  margin: const EdgeInsets.only(top: 100.0),
+                  padding: const EdgeInsets.only(bottom: 100.0),
+                  child: Center(
+                    // Center is a layout widget. It takes a single child and positions it
+                    // in the middle of the parent.
+                    child: Column(
+                      // Column is also a layout widget. It takes a list of children and
+                      // arranges them vertically. By default, it sizes itself to fit its
+                      // children horizontally, and tries to be as tall as its parent.
+                      //
+                      // Invoke "debug painting" (press "p" in the console, choose the
+                      // "Toggle Debug Paint" action from the Flutter Inspector in Android
+                      // Studio, or the "Toggle Debug Paint" command in Visual Studio Code)
+                      // to see the wireframe for each widget.
+                      //
+                      // Column has various properties to control how it sizes itself and
+                      // how it positions its children. Here we use mainAxisAlignment to
+                      // center the children vertically; the main axis here is the vertical
+                      // axis because Columns are vertical (the cross axis would be
+                      // horizontal).
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: <Widget>[
+                        MainTableWidget(),
+
+                        // CustomPaint(
+                        //   size: const Size(double.infinity, double.infinity),
+                        //   painter: MyPainter(),
+                        // ),
+                      ],
+                    ),
+                  ),
+                ),
+              ),
+            ),
+            Positioned(
+              bottom: 20,
+              right: 20,
+              child: Container(
+                width: 50,
+                height: 50,
+                decoration: BoxDecoration(
+                    color: typeStyleColor[selectedMenu] ?? Colors.white,
+                    border: Border.all(
+                        color: Colors.black,
+                        width: 2,
+                        style: BorderStyle.solid)),
+                child: PopupMenuButton<MenuItem>(
+                  tooltip: "Настроение",
+                  initialValue: selectedMenu,
+                  // Callback that sets the selected popup menu item.
+                  onSelected: (MenuItem item) {
+                    setState(() {
+                      selectedMenu = item;
+                      _menuSelectionProvider.selectedMenu = item;
+                    });
+                  },
+                  itemBuilder: (BuildContext context) =>
+                      <PopupMenuEntry<MenuItem>>[
+                    const PopupMenuItem<MenuItem>(
+                      value: MenuItem.item1,
+                      child: Text('Отличный'),
+                    ),
+                    const PopupMenuItem<MenuItem>(
+                      value: MenuItem.item2,
+                      child: Text('Хороший'),
+                    ),
+                    const PopupMenuItem<MenuItem>(
+                      value: MenuItem.item3,
+                      child: Text('Обычный'),
+                    ),
+                    const PopupMenuItem<MenuItem>(
+                      value: MenuItem.item4,
+                      child: Text('Устал'),
+                    ),
+                    const PopupMenuItem<MenuItem>(
+                      value: MenuItem.item5,
+                      child: Text('Плохой'),
+                    ),
+                    const PopupMenuItem<MenuItem>(
+                      value: MenuItem.item6,
+                      child: Text('Болею'),
+                    ),
+                  ],
+                ),
+              ),
+            )
+          ],
         ),
       ),
-      floatingActionButton: FloatingActionButton(
-        onPressed: _incrementCounter,
-        tooltip: 'Increment',
-        child: const Icon(Icons.add),
-      ), // This trailing comma makes auto-formatting nicer for build methods.
+
+      // floatingActionButton: FloatingActionButton(
+      //   onPressed: _incrementCounter,
+      //   tooltip: 'Increment',
+      //   child: const Icon(Icons.add),
+      // ), // This trailing comma makes auto-formatting nicer for build methods.
     );
   }
 }
