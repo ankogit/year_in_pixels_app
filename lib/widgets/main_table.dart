@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:dio/dio.dart';
+import 'package:lottie/lottie.dart';
 import 'package:year_in_pixel_app/models/year_data.dart';
 import 'dart:convert';
 
@@ -10,7 +11,11 @@ class MainTableWidget extends StatefulWidget {
   _MainTableWidgetState createState() => _MainTableWidgetState();
 }
 
-class _MainTableWidgetState extends State<MainTableWidget> {
+class _MainTableWidgetState extends State<MainTableWidget>
+    with SingleTickerProviderStateMixin {
+  late AnimationController _anim_controller;
+  late Animation<double> _animation;
+
   final dio = Dio();
   bool _isLoading = true;
   late int currYear = 2023;
@@ -33,8 +38,15 @@ class _MainTableWidgetState extends State<MainTableWidget> {
 
   @override
   void initState() {
+    _anim_controller = AnimationController(vsync: this);
     super.initState();
     fetchData();
+  }
+
+  @override
+  void dispose() {
+    _anim_controller.dispose();
+    super.dispose();
   }
 
   void changeYear(newYear) async {
@@ -79,7 +91,21 @@ class _MainTableWidgetState extends State<MainTableWidget> {
                       style: BorderStyle.solid),
                 ),
                 child: Stack(
-                  children: [Center(child: CircularProgressIndicator())],
+                  children: [
+                    Center(
+                      child: Lottie.asset(
+                          'assets/animations/anim_clock_fast.json',
+                          width: 150,
+                          reverse: true,
+                          controller: _anim_controller,
+                          height: 150, onLoaded: (comp) {
+                        _anim_controller
+                          ..duration = Duration(milliseconds: 2000)
+                          ..repeat();
+                      }),
+                    ),
+                    // Center(child: CircularProgressIndicator())
+                  ],
                 )))
         : Container(
             // width: 500,

@@ -5,6 +5,7 @@ import 'package:year_in_pixel_app/widgets/main_table.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:patterns_canvas/patterns_canvas.dart';
 import 'package:pinch_zoom/pinch_zoom.dart';
+import 'package:lottie/lottie.dart';
 
 import 'models/menuSelection.dart';
 
